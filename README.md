@@ -6,7 +6,7 @@ map.sh - a bash script to map fastq reads using bowtie
 # RT.py functions
 likelihood - a function the performs the multiple likelihood ratio test
 
-likelihood_diff - a function that runs the multiple likelihood ratio test on a dataframe with RT profiles
+likelihood_ratio_delta - a function that runs the multiple likelihood ratio test on a dataframe with RT profiles
 
 windows_genome - a function that converts sorted genomic coordinates into RT profiles
 
