@@ -232,8 +232,6 @@ def windows_genome(exp,rep, smoothing,window_size,step,name,chroms,genome,sorted
     raw_data['mid']=raw_data['mid'].astype(int)
     raw_data['ratio']=raw_data['normal_s']/raw_data['g']
     raw_data['log_ratio']=np.log10(raw_data['ratio'])
-    #CURRENTLY Z SCORE SKIPS LOG
-    ###added clause because in BJ-FTB2 std was huge --> need to remove crazy outliers
     std_cur=raw_data['ratio'].std()
     raw_data=raw_data[abs(raw_data['ratio'])<(std_cur*10)]
     raw_data=raw_data[raw_data['s']>1]
@@ -247,8 +245,6 @@ def windows_genome(exp,rep, smoothing,window_size,step,name,chroms,genome,sorted
     #CREATE ITERATED DATA
     smooth_frame=pd.DataFrame(columns=['chromosome','loc','tor'])
     
-    #remove 100 kb windows with stdev over 1.1    
-
     print(strftime("%H:%M:%S")+' starting to interpolate '+exp+' '+rep)
     #create smoothed interpolated data
     for chro in chroms:
@@ -286,7 +282,7 @@ def windows_genome(exp,rep, smoothing,window_size,step,name,chroms,genome,sorted
             #if long enough calculate interpolation
             if len(locs)>min_len and len(interp_range)>1:
                 if loess==True:
-                    frac=15.0/len(locs) #consider making this dependent on length? o maybe just .01 which worked well in the first region of scn 10x5_all?
+                    frac=15.0/len(locs) 
                     lowess = sm.nonparametric.lowess(tors, locs, frac=frac)
                     lowess_x = list(zip(*lowess))[0]
                     lowess_y = list(zip(*lowess))[1]
@@ -336,7 +332,6 @@ def windows_genome(exp,rep, smoothing,window_size,step,name,chroms,genome,sorted
         smooth_frame=smooth_frame.append(chro_data)
 
     #add column of log ratios aftr subtracting avg to norm around zero
-#    smooth_frame['norm_tor']=(smooth_frame['tor']-smooth_frame['tor'][smooth_frame['chromosome']!='chrX'].mean())/smooth_frame['tor'][smooth_frame['chromosome']!='chrX'].std()
     if not os.path.exists(smooth_ToR_file.rsplit("/",1)[0]):
         os.makedirs(smooth_ToR_file.rsplit("/",1)[0])
 
@@ -370,7 +365,6 @@ def windows_genome(exp,rep, smoothing,window_size,step,name,chroms,genome,sorted
     
 def multi_interp(name,exp_names,normalized=False):
     """takes all locations  and combines into one file holding all data.  Inserts nan for missing data"""
-    #### other tor type for non normalized tor is just 'tor'
     print('multi-interp') 
     if normalized:
         tor_type='norm_tor'
@@ -418,7 +412,6 @@ def likelihood(group1,group2,sds,df=1):
     group2=group2.values.tolist()
     two_group_likeli=[probability(a,np.mean(group1),sds[0]) for a in group1]+[probability(a,np.mean(group2),sds[1]) for a in group2]
     all_group=group1+group2
-#    one_group_likeli=[probability(a,np.mean(all_group),sds[2]) for a in all_group]
     one_group_likeli=[probability(a,np.mean(all_group),sds[0]) for a in group1]+[probability(a,np.mean(all_group),sds[1]) for a in group2]
     two=reduce(lambda x, y: x*y, two_group_likeli)
     one=reduce(lambda x, y: x*y, one_group_likeli)
@@ -534,16 +527,12 @@ def likelihood_ratio_delta(name,other_project_names=None,colors=None,graph=True,
         ax2.set_ylabel('-log')
         
                     
-    #    h1, l1 = ax1.get_legend_handles_labels()
-    #    h2, l2 = ax2.get_legend_handles_labels()
-    #    ax1.legend(h1+h2, l1+l2)
         box = ax1.get_position()
         ax1.set_position([box.x0, box.y0, box.width * 0.8, box.height])
         box = ax2.get_position()
         ax2.set_position([box.x0, box.y0, box.width * 0.8, box.height])
 
         # Put a legend to the right of the current axis
-    #    ax1.legend(h1+h2, l1+l2, loc='center left', bbox_to_anchor=(1, 0.5))
         ax1.legend(loc='center left', bbox_to_anchor=(1, 0.5))
         lgd=ax2.legend(loc='center left', bbox_to_anchor=(1, 0.5))
         mkfunc=lambda x,pos: '%1.1fM' % (x * 1e-6) 
