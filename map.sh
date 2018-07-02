@@ -56,8 +56,6 @@ echo 'sorting' $sample_name `date`
 bam=$data_path/$exp/mapped/$sample_name.nodups.bam
 samtools sort -n $bam > $bam.nsorted.bam
 
-	#included sed to deal with the illumina labeling of pairs:
-	#in older scripts used to filter using samtools view -bu -F 1804 $bam.nsorted.bam
 if $paired; then
 	samtools view -h $bam.nsorted.bam | sed 's/\/1;1//g' - | sed 's/\/2;1//g' - | samtools view -bu | bedtools bamtobed -i stdin -bedpe | awk '{print $1"\t"$2"\t"$3"\t"}' | sort -k1,1 -k2,2n > $data_path/$exp/sorted/$sample_name/$sample_name.all.bed
 else
